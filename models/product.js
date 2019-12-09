@@ -26,6 +26,7 @@ module.exports = class product { // Exportaremos uma classe como modelo para os 
   */
   save() {
     getProductsFromFile((products) => {
+      this.productId = Math.random().toString();
       products.push(this);
       // Escreve o array products no formato json
       fs.writeFile(p, JSON.stringify(products), (err) => {
@@ -36,5 +37,12 @@ module.exports = class product { // Exportaremos uma classe como modelo para os 
 
   static fetchAll(cb) {
     getProductsFromFile(cb);
+  }
+
+  static findById(id, cb) {
+    getProductsFromFile((products) => {
+      const prod = products.find((prods) => (prods.productId === id));
+      cb(prod);
+    });
   }
 };

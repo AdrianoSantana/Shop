@@ -10,6 +10,17 @@ exports.getProducts = (req, res) => { // Recebe todos os projetos, getALL
   });
 };
 
+exports.getOneProduct = (req, res) => {
+  const { productId } = req.params;
+  Product.findById(productId, (product) => {
+    res.status(200).render('./shop/product-detail.ejs', {
+      pageTitle: product.title,
+      path: '/products',
+      product,
+    });
+  });
+};
+
 exports.getIndex = (req, res) => {
   Product.fetchAll((products) => {
     res.status(200).render('./shop/index.ejs', {
