@@ -12,7 +12,8 @@ const getProductsFromFile = (cb) => {
 };
 
 module.exports = class product { // Exportaremos uma classe como modelo para os produtos
-  constructor(title, imageUrl, description, price) {
+  constructor(productId, title, imageUrl, description, price) {
+    this.productId = productId;
     this.title = title;
     this.imageUrl = imageUrl;
     this.description = description;
@@ -26,12 +27,22 @@ module.exports = class product { // Exportaremos uma classe como modelo para os 
   */
   save() {
     getProductsFromFile((products) => {
-      this.productId = Math.random().toString();
-      products.push(this);
-      // Escreve o array products no formato json
-      fs.writeFile(p, JSON.stringify(products), (err) => {
-        console.log(err);
-      });
+      if (this.productId) {
+        // eslint-disable-next-line max-len
+        const existingProductIndex = products.findIndex((prod) => prod.productId === this.productId);
+        const updatedProducts = [...products];
+        updatedProducts[existingProductIndex] = this;
+        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+          console.log(err);
+        });
+      } else {
+        this.productId = Math.random().toString();
+        products.push(this);
+        // Escreve o array products no formato json
+        fs.writeFile(p, JSON.stringify(products), (err) => {
+          console.log(err);
+        });
+      }
     });
   }
 

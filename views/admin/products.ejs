@@ -19,7 +19,7 @@
               <p class="product__description"><%= prods[i].description %></p>
             </div>
             <div class="card__actions">
-              <a href="/admin/edit-product" class="btn"> Edit </a>
+              <a href="/admin/edit-product/<%=prods[i].productId%>/?edit=true" class="btn"> Edit </a>
               <a class="btn"> Delete </a>
             </div>
           </article>

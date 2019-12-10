@@ -1,4 +1,5 @@
 const Product = require('../models/product'); // Importando o modelo de produto para o controller
+const Cart = require('../models/cart');
 
 exports.getProducts = (req, res) => { // Recebe todos os projetos, getALL
   Product.fetchAll((products) => {
@@ -36,6 +37,14 @@ exports.getCart = (req, res) => {
     path: '/cart',
     pageTitle: 'Your cart',
   });
+};
+
+exports.postCart = (req, res) => {
+  const { productId } = req.body;
+  Product.findById(productId, (product) => {
+    Cart.addProduct(productId, product.price);
+  });
+  res.redirect('/');
 };
 
 exports.getCheckout = (req, res) => {
