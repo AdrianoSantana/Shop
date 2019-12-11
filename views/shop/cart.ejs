@@ -3,6 +3,24 @@
 
 <body>
   <%- include('../includes/navigation.ejs') %>
+  <main>
+   <% if( products.length > 0) { %>
+      <ul>
+        <% for (let i = 0; i < products.length; i++) { %>
+          <li> 
+            <p> <%= products[i].productData.title%> (<%=products[i].qty %>)</p>
+            <form action="/cart-delete-item" method="POST">
+              <input type="hidden" value="<%= products[i].productData.productId%>" name="productId">
+              <button class="btn" type="submit"> Delete </button>
+            </form>
+          </li>
+        <% } %>
+      </ul>
+      <p> Total Price : <%= totalPrice %></p>
+   <%} else { %>
+      <h1> No products in cart! </h1>
+    <% } %>
+  </main>
 </body>
 
 </html>
