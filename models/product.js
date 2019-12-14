@@ -1,73 +1,27 @@
-const fs = require('fs');
-const path = require('path');
-const pathUtil = require('../util/path');
-const Cart = require('./cart');
+const Sequelize = require('sequelize'); // Deve se importar o Sequelize para obter os tipos de dados q ele aceita
 
-const p = path.join(pathUtil, 'data', 'products.json');
+const sequelize = require('../util/database'); // Importando o pool para a conexão com o database
 
-const getProductsFromFile = (cb) => {
-  fs.readFile(p, (err, data) => {
-    if (err) cb([]);
-    else cb(JSON.parse(data));
-  });
-};
+const Product = sequelize.define('product', { // Usamos o pool de conexão para criar o modelo pro database
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+  title: Sequelize.STRING,
+  price: {
+    type: Sequelize.DOUBLE,
+    allowNull: false,
+  },
+  imageUrl: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  description: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+});
 
-module.exports = class product { // Exportaremos uma classe como modelo para os produtos
-  constructor(productId, title, imageUrl, description, price) {
-    this.productId = productId;
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
-    this.price = price;
-  }
-
-  /*
-  Uma função que irá salvas objetos da classe product dentro do array
-  products como se o array fosse um bd
-  Salvando products em um arquivo, sem ser BD
-  */
-  save() {
-    getProductsFromFile((products) => {
-      if (this.productId) {
-        // eslint-disable-next-line max-len
-        const existingProductIndex = products.findIndex((prod) => prod.productId === this.productId);
-        const updatedProducts = [...products];
-        updatedProducts[existingProductIndex] = this;
-        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
-          console.log(err);
-        });
-      } else {
-        this.productId = Math.random().toString();
-        products.push(this);
-        // Escreve o array products no formato json
-        fs.writeFile(p, JSON.stringify(products), (err) => {
-          console.log(err);
-        });
-      }
-    });
-  }
-
-  static delete(productId) {
-    getProductsFromFile((products) => {
-      const productWillbeDeleted = products.find((prod) => prod.productId === productId);
-      const productIndex = products.findIndex((prod) => prod.productId === productId);
-      products.splice(productIndex, 1);
-      fs.writeFile(p, JSON.stringify(products), (err) => {
-        if (!err) {
-          Cart.deleteProduct(productId, productWillbeDeleted.price);
-        }
-      });
-    });
-  }
-
-  static fetchAll(cb) {
-    getProductsFromFile(cb);
-  }
-
-  static findById(id, cb) {
-    getProductsFromFile((products) => {
-      const prod = products.find((prods) => (prods.productId === id));
-      cb(prod);
-    });
-  }
-};
+module.exports = Product;
