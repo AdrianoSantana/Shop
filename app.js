@@ -1,48 +1,54 @@
-const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
-const sequelize = require('./util/database');
 
-const app = express();
-const controllerNotFound = require('./controllers/404');
-const adminRoutes = require('./routes/admin');
-const shopRouter = require('./routes/shop');
-const Product = require('./models/product');
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-app.set('view-engine', 'ejs');
+const app = express();
+
+app.set('view engine', 'ejs');
 app.set('views', 'views');
-app.use(bodyParser.urlencoded({ extended: true }));
+
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/admin', adminRoutes);
-app.use(shopRouter);
-
 app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
+  User.findById('5e063af4e0d882184df2883c')
+    .then(user => {
       req.user = user;
       next();
     })
-    .catch((err) => console.log(err));
+    .catch(err => console.log(err));
 });
 
-app.use(controllerNotFound.notFound);
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 
-Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' });
-User.hasMany(Product);
+app.use(errorController.get404);
 
-sequelize.sync()
-  .then((result) => {
-    return User.findByPk(1);
+
+mongoose.connect('mongodb+srv://ans3:Adr679852@nodecomplete-oinwj.gcp.mongodb.net/shop?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(result => {
+    User.findOne().then(user => {
+      if (!user) {
+        const user = new User({
+          name: 'Adriano Santana',
+          email: 'ans3@cin.ufpe.br',
+          cart: {
+            items: []
+          }
+        });
+        user.save();
+      }
+    });
+    app.listen(3000);
   })
-  .then((user) => {
-    if (!user) {
-      return User.create({ name: 'Adriano', email: 'ans3@cin.ufpe.br' });
-    }
-    return user;
-  })
-  .then((user) => {
-    app.listen(3000, () => console.log('Server is running.'));
-  })
-  .catch((err) => console.log(err));
+  .catch(err => {
+    console.log(err);
+  });
